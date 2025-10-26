@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Lecture Alert System — Computer Science Dept</title>
+  <style>
+    /* ---------- Variables & reset ---------- */
+    :root{
+      --brand:#013220; --card:#ffffff; --muted:#7a8a80; --accent:#00a89a; --accent2:#0077cc;
+      --glass: rgba(0,0,0,0.06);
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:Inter,Arial,Helvetica,sans-serif;background:#f3f6f5;color:#0b1a16;min-height:100vh}
+    .container{max-width:1100px;margin:18px auto;padding:12px}
+
+    /* header */
+    header{display:flex;justify-content:space-between;align-items:center;background:linear-gradient(90deg,var(--brand),#014d32);color:#fff;padding:12px;border-radius:10px}
+    .brand{display:flex;gap:12px;align-items:center}
+    .logo{width:110px;height:36px;background:#fff;border-radius:6px;color:#013220;display:flex;align-items:center;justify-content:center;font-weight:700}
+    .title{font-size:18px;font-weight:700}
+    .meta{font-size:13px;color:rgba(255,255,255,0.9)}
+    .header-actions{display:flex;gap:10px;align-items:center}
+
+    .icon-btn{background:transparent;border:none;color:#fff;padding:8px;border-radius:8px;cursor:pointer;font-size:18px;position:relative}
+    .badge{position:absolute;top:4px;right:4px;background:#ff3860;color:#fff;border-radius:999px;padding:2px 6px;font-size:12px}
+
+    /* layout */
+    .main{display:grid;grid-template-columns:280px 1fr;gap:12px;margin-top:14px}
+    @media(max-width:880px){.main{grid-template-columns:1fr}}
+
+    /* left pane */
+    .left{display:flex;flex-direction:column;gap:12px}
+    .card{background:var(--card);padding:12px;border-radius:10px;box-shadow:0 6px 18px rgba(10,10,10,0.06)}
+    .nav-btn{display:flex;gap:10px;align-items:center;padding:10px;border-radius:8px;cursor:pointer;border:1px solid transparent}
+    .nav-btn.active{background:linear-gradient(90deg,var(--accent),var(--accent2));color:#fff}
+    .nav-btn:hover{background:var(--glass)}
+
+    .profile{display:flex;gap:12px;align-items:center}
+    .avatar{width:60px;height:60px;border-radius:10px;object-fit:cover;background:#eee}
+
+    /* main pane content */
+    .topbar{display:flex;justify-content:space-between;align-items:center;gap:12px}
+    .stats{display:flex;gap:12px;flex-wrap:wrap}
+    .stat{background:linear-gradient(180deg,#fff,#f6fbfa);padding:10px;border-radius:8px;min-width:140px;text-align:center;box-shadow:0 4px 12px rgba(0,0,0,0.04)}
+    .panel{margin-top:12px}
+
+    /* responsive */
+    @media(max-width:880px){
+      header{flex-direction:column;align-items:flex-start;gap:10px}
+      .header-actions{align-self:flex-end}
+    }
+
+    /* forms */
+    input[type="text"], input[type="password"], select, textarea{width:100%;padding:10px;border-radius:8px;border:1px solid #dfeae6;margin-top:8px}
+    button.primary{background:linear-gradient(90deg,var(--accent),var(--accent2));color:#fff;border:none;padding:10px 14px;border-radius:8px;cursor:pointer}
+    button.ghost{background:transparent;border:1px solid #dfeae6;padding:10px;border-radius:8px;cursor:pointer}
+
+    /* modal */
+    .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.45);display:flex;align-items:center;justify-content:center;z-index:999}
+    .modal{background:#fff;padding:16px;border-radius:10px;max-width:520px;width:100%}
+
+    /* small */
+    .muted{color:var(--muted);font-size:13px}
+    .flex{display:flex;gap:10px;align-items:center}
+    .right{text-align:right}
+    .hide{display:none}
+    .help-box{white-space:pre-wrap;background:#f8fff9;padding:12px;border-radius:8px;border:1px dashed #e1f4ee}
+    .table{width:100%;border-collapse:collapse}
+    .table th, .table td{padding:8px;border-bottom:1px solid #eef6f3;font-size:14px}
+    .small-btn{padding:6px 8px;border-radius:6px;border:none;cursor:pointer}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="brand">
+        <div class="logo">CS-LAS</div>
+        <div>
+          <div class="title">Computer Science — Lecture Alert System</div>
+          <div class="meta">Department of Computer Science</div>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <button class="icon-btn" title="Help" id="globalHelpBtn">❓</button>
+        <button class="icon-btn" id="notifBtn" title="Notifications">🔔<span id="notifCount" class="badge hide">0</span></button>
+        <div id="topUserArea" class="flex" style="align-items:center">
+          <img id="topAvatar" class="avatar" src="" alt="avatar" />
+          <div style="text-align:right">
+            <div id="topName" style="font-weight:700">Guest</div>
+            <div id="topRole" class="muted">Not logged</div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- login/register area -->
+    <div id="authArea" class="card" style="margin-top:12px">
+      <div id="loginView">
+        <h3>Login</h3>
+        <div class="muted">Select role and provide username/password (use defaults below for testing)</div>
+        <select id="loginRole" style="margin-top:10px;padding:8px;border-radius:6px">
+          <option value="student">Student</option>
+          <option value="courserep">Course Rep</option>
+          <option value="lecturer">Lecturer</option>
+          <option value="hod">HOD</option>
+        </select>
+        <input id="loginUser" type="text" placeholder="Username" />
+        <input id="loginPass" type="password" placeholder="Password" />
+        <div style="display:flex;gap:10px;margin-top:10px">
+          <button class="primary" id="loginBtn">Login</button>
+          <button class="ghost" id="showRegBtn">Student Register</button>
+        </div>
+
+       
+
+         
+      </div>
+
+
+      <!-- registration only for students -->
+      <div id="regView" class="hide">
+        <h3>Student Registration</h3>
+        <div class="muted">Only students register here. Course reps are assigned by HOD.</div>
+        <input id="regName" type="text" placeholder="Full name" />
+        <input id="regUsername" type="text" placeholder="Username (unique)" />
+        <input id="regPass" type="password" placeholder="Password" />
+        <label class="muted">Profile picture (optional)</label>
+        <input id="regPic" type="file" accept="image/*" />
+       <br> <label class="muted">Level</label>
+        <select id="regLevel">
+          <option>Diploma 1</option>
+          <option>Diploma 2</option>
+          <option>ND 1</option>
+          <option>ND 2</option>
+          <option>NDS</option>
+          <option>HND 1</option>
+          <option>HND 2</option>
+        </select>
+
+        <label class="muted">HND Option (choose if HND level)</label>
+        <select id="regOption">
+          <option value="">-- not applicable --</option>
+          <option>Software & Web Development</option>
+          <option>Networking & Cloud Computing</option>
+        </select>
+
+        
+
+        <div style="display:flex;gap:10px;margin-top:10px">
+          <button class="primary" id="regBtn">Register Student</button>
+          <button class="ghost" id="cancelRegBtn">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- main app area (hidden until login) -->
+    <div id="appArea" class="hide">
+      <div class="main">
+        <!-- LEFT column: navigation -->
+        <div class="left">
+          <div class="card profile">
+            <img id="avatar" class="avatar" src="" alt="avatar" />
+            <div>
+              <div id="displayName" style="font-weight:700">Guest</div>
+              <div id="displayRole" class="muted">Not logged</div>
+              <div style="margin-top:8px">
+                <button class="ghost" id="logoutBtn">Logout</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="nav-btn active" data-nav="home" id="navHome">🏠 Home</div>
+            <div class="nav-btn" data-nav="courses" id="navCourses">📚 Courses</div>
+            <div class="nav-btn" data-nav="alerts" id="navAlerts">🔔 Alerts</div>
+            <div class="nav-btn" data-nav="profile" id="navProfile">👤 Profile</div>
+            <div class="nav-btn" data-nav="help" id="navHelp">❓ Help</div>
+          </div>
+
+          <!-- HOD only: CRUD panel -->
+          <div id="hodPanel" class="card hide">
+            <h4>HOD Controls</h4>
+            <div style="margin-top:8px">
+              <button class="primary" id="openHodCrud">Manage Users (CRUD)</button>
+            </div>
+            <div style="margin-top:10px">
+              <div class="muted">Assign Course Rep:</div>
+              <select id="assignRepSelect" style="margin-top:8px;padding:8px;border-radius:6px"></select>
+              <select id="assignLevelSelect" style="margin-top:8px;padding:8px;border-radius:6px"></select>
+              <button class="primary" id="assignRepBtn" style="margin-top:8px">Assign Rep to Level</button>
+            </div>
+            <div style="margin-top:10px">
+              <div class="muted">Student counts</div>
+              <div id="countsBox" style="margin-top:8px"></div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- RIGHT column: main content -->
+        <div>
+          <div class="card topbar">
+            <div>
+              <div style="font-weight:700;font-size:18px" id="mainTitle">Dashboard</div>
+              <div class="muted" id="mainSubtitle">Welcome</div>
+            </div>
+            <div class="right">
+              <button class="ghost" id="composeBtn">✍️ Compose Alert</button>
+              <button class="ghost" id="helpBtn">Help</button>
+            </div>
+          </div>
+
+          <!-- Home content -->
+          <div id="viewHome" class="panel card">
+            <h3>Home</h3>
+            <div class="muted">Quick overview</div>
+            <div class="stats" style="margin-top:12px">
+              <div class="stat">
+                <div class="muted">Students</div>
+                <div id="statStudents" style="font-weight:700;font-size:20px">0</div>
+              </div>
+              <div class="stat">
+                <div class="muted">Course Reps</div>
+                <div id="statReps" style="font-weight:700;font-size:20px">0</div>
+              </div>
+              <div class="stat">
+                <div class="muted">Lecturers</div>
+                <div id="statLects" style="font-weight:700;font-size:20px">0</div>
+              </div>
+            </div>
+            <div style="margin-top:12px">
+              <h4>Recent Alerts</h4>
+              <div id="recentAlerts"></div>
+            </div>
+          </div>
+
+          <!-- Courses content (only visible after student clicks) -->
+          <div id="viewCourses" class="panel card hide">
+            <h3>Courses</h3>
+            <div class="muted">Courses available for your level</div>
+            <div id="coursesList" style="margin-top:12px"></div>
+          </div>
+
+          <!-- Alerts content -->
+          <div id="viewAlerts" class="panel card hide">
+            <h3>Alerts</h3>
+            <div class="muted">All messages and announcements</div>
+            <div id="alertsList" style="margin-top:12px"></div>
+          </div>
+
+          <!-- Profile content -->
+          <div id="viewProfile" class="panel card hide">
+            <h3>Profile</h3>
+            <div style="display:flex;gap:12px;align-items:center">
+              <img id="profPic" src="" class="avatar" />
+              <div>
+                <div id="profName" style="font-weight:700">Name</div>
+                <div id="profRole" class="muted">Role</div>
+                <div style="margin-top:8px">
+                  <label class="muted">Upload picture</label>
+                  <input type="file" id="profPicInput" accept="image/*" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Compose modal -->
+          <div id="composeModal" class="hide card" style="margin-top:12px">
+            <h3>Compose Alert</h3>
+            <div class="muted">Select target group and channels</div>
+            <select id="composeTarget" style="margin-top:8px;padding:8px;border-radius:6px">
+              <option value="all">All Students</option>
+            </select>
+            <textarea id="composeText" placeholder="Message text" style="margin-top:8px;padding:10px;border-radius:8px"></textarea>
+            <div style="display:flex;gap:8px;margin-top:8px;align-items:center">
+              <label><input type="checkbox" id="chPush" checked> In-app</label>
+              <label><input type="checkbox" id="chSMS"> SMS</label>
+              <label><input type="checkbox" id="chEmail"> Email</label>
+            </div>
+            <div id="smsOverride" class="hide" style="margin-top:8px">
+              <label class="muted">Override phone numbers (comma separated)</label>
+              <input id="smsOverrideInput" type="text" placeholder="+2348012345678, +234..." />
+            </div>
+            <div style="margin-top:10px;display:flex;gap:8px">
+              <button class="primary" id="sendComposeBtn">Send</button>
+              <button class="ghost" id="cancelComposeBtn">Cancel</button>
+            </div>
+          </div>
+
+          <!-- HOD CRUD modal -->
+          <div id="hodCrudModal" class="hide card" style="margin-top:12px">
+            <h3>HOD — Manage Users</h3>
+            <div style="margin-top:8px;overflow:auto;max-height:260px">
+              <table class="table" id="usersTable">
+                <thead><tr><th>User</th><th>Role</th><th>Level/Option</th><th>Actions</th></tr></thead>
+                <tbody></tbody>
+              </table>
+            </div>
+            <div style="margin-top:10px">
+              <h4>Create New User</h4>
+              <select id="newRole"><option value="student">Student</option><option value="courserep">Course Rep</option><option value="lecturer">Lecturer</option></select>
+              <input id="newName" placeholder="Full name" />
+              <input id="newUsername" placeholder="username" />
+              <input id="newPass" placeholder="password" />
+              <select id="newLevel"><option>ND 1</option><option>ND 2</option><option>HND 1</option><option>HND 2</option></select>
+              <select id="newOption"><option value="">--option--</option><option>Software & Web Development</option><option>Networking & Cloud Computing</option></select>
+              <div style="margin-top:8px;display:flex;gap:8px"><button class="primary" id="createUserBtn">Create</button><button class="ghost" id="closeCrudBtn">Close</button></div>
+            </div>
+          </div>
+
+          <!-- Help / Guide area -->
+          <div id="viewHelp" class="panel card hide">
+            <h3>Help / User Guide</h3>
+            <div id="helpText" class="help-box">Select Help from your dashboard</div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Notifications dropdown (simple) -->
+  <div id="notifModal" class="modal-backdrop hide" style="align-items:flex-start;padding-top:80px">
+    <div class="modal">
+      <h3>Notifications</h3>
+      <div id="notifItems"></div>
+      <div style="margin-top:10px;text-align:right"><button class="ghost" id="closeNotif">Close</button></div>
+    </div>
+  </div>
+
+<script>
+/* ------------------------------
+   Client-side Lecture Alert System
+   Single-file demo using localStorage
+   ------------------------------ */
+
+const LS_USERS = "las_users_v2";
+const LS_ALERTS = "las_alerts_v2";
+const LS_CURRENT = "las_current_v2";
+
+/* Default initial data */
+const initialUsers = [
+  // HOD (required exact as requested)
+  { id: "hod_moses1", role:"hod", username:"Moses1", pass:"M123", name:"Mr. Tyavnande Moses", level:"", option:"", phone:"", pic:"" },
+
+  // Lecturers (named)
+  { id:"lect_audu", role:"lecturer", username:"audua", pass:"A123", name:"Dr. Audu", level:"", option:"", phone:"", pic:"" },
+  { id:"lect_nwosu", role:"lecturer", username:"nwosu", pass:"N123", name:"Dr. Nwosu", level:"", option:"", phone:"", pic:"" },
+
+  // Course reps (two defaults)
+  { id:"rep_nd1", role:"courserep", username:"rep_nd1", pass:"R123", name:"Rep - ND1", level:"ND 1", option:"", phone:"", pic:"" },
+  { id:"rep_hnd2", role:"courserep", username:"rep_hnd2", pass:"R234", name:"Rep - HND2", level:"HND 2", option:"", phone:"", pic:"" },
+
+  // Students (two defaults)
+  { id:"stud_john", role:"student", username:"stud_john", pass:"S123", name:"John Student", level:"ND 1", option:"", course:"CSC 201", phone:"+2348011111111", pic:"" },
+  { id:"stud_jane", role:"student", username:"stud_jane", pass:"S234", name:"Jane Student", level:"HND 2", option:"Networking & Cloud Computing", course:"CSC 402", phone:"+2348022222222", pic:"" }
+];
+
+function initStorage(){
+  if(!localStorage.getItem(LS_USERS)) localStorage.setItem(LS_USERS, JSON.stringify(initialUsers));
+  if(!localStorage.getItem(LS_ALERTS)) localStorage.setItem(LS_ALERTS, JSON.stringify([]));
+}
+initStorage();
+
+/* Utility functions */
+function getUsers(){ return JSON.parse(localStorage.getItem(LS_USERS) || "[]"); }
+function saveUsers(u){ localStorage.setItem(LS_USERS, JSON.stringify(u)); }
+function getAlerts(){ return JSON.parse(localStorage.getItem(LS_ALERTS) || "[]"); }
+function saveAlerts(a){ localStorage.setItem(LS_ALERTS, JSON.stringify(a)); }
+function setCurrent(u){ localStorage.setItem(LS_CURRENT, JSON.stringify(u)); updateTopUI(); }
+function getCurrent(){ return JSON.parse(localStorage.getItem(LS_CURRENT) || "null"); }
+function uid(){ return "id"+Date.now()+Math.floor(Math.random()*999); }
+function timeAgo(ts){ const d=Date.now()-ts; const s=Math.floor(d/1000); if(s<60) return s+"s ago"; const m=Math.floor(s/60); if(m<60) return m+"m ago"; const h=Math.floor(m/60); if(h<24) return h+"h ago"; return Math.floor(h/24)+"d ago";}
+
+/* --- UI refs --- */
+const authArea = document.getElementById("authArea");
+const loginView = document.getElementById("loginView");
+const regView = document.getElementById("regView");
+const showRegBtn = document.getElementById("showRegBtn");
+const cancelRegBtn = document.getElementById("cancelRegBtn");
+const loginBtn = document.getElementById("loginBtn");
+const regBtn = document.getElementById("regBtn");
+const appArea = document.getElementById("appArea");
+const displayName = document.getElementById("displayName");
+const displayRole = document.getElementById("displayRole");
+const avatar = document.getElementById("avatar");
+const topName = document.getElementById("topName");
+const topRole = document.getElementById("topRole");
+const topAvatar = document.getElementById("topAvatar");
+const notifCount = document.getElementById("notifCount");
+const notifBtn = document.getElementById("notifBtn");
+const notifModal = document.getElementById("notifModal");
+const notifItems = document.getElementById("notifItems");
+const closeNotif = document.getElementById("closeNotif");
+const mainTitle = document.getElementById("mainTitle");
+const mainSubtitle = document.getElementById("mainSubtitle");
+
+/* nav */
+const navButtons = document.querySelectorAll(".nav-btn");
+const viewHome = document.getElementById("viewHome");
+const viewCourses = document.getElementById("viewCourses");
+const viewAlerts = document.getElementById("viewAlerts");
+const viewProfile = document.getElementById("viewProfile");
+const viewHelp = document.getElementById("viewHelp");
+
+/* stats & lists */
+const statStudents = document.getElementById("statStudents");
+const statReps = document.getElementById("statReps");
+const statLects = document.getElementById("statLects");
+const recentAlerts = document.getElementById("recentAlerts");
+const alertsList = document.getElementById("alertsList");
+const coursesList = document.getElementById("coursesList");
+
+/* compose */
+const composeBtn = document.getElementById("composeBtn");
+const composeModal = document.getElementById("composeModal");
+const composeTarget = document.getElementById("composeTarget");
+const composeText = document.getElementById("composeText");
+const chSMS = document.getElementById("chSMS");
+const chEmail = document.getElementById("chEmail");
+const chPush = document.getElementById("chPush");
+const smsOverride = document.getElementById("smsOverride");
+const smsOverrideInput = document.getElementById("smsOverrideInput");
+const sendComposeBtn = document.getElementById("sendComposeBtn");
+const cancelComposeBtn = document.getElementById("cancelComposeBtn");
+
+/* hod */
+const hodPanel = document.getElementById("hodPanel");
+const openHodCrud = document.getElementById("openHodCrud");
+const hodCrudModal = document.getElementById("hodCrudModal");
+const usersTableBody = document.querySelector("#usersTable tbody");
+const newRole = document.getElementById("newRole");
+const newName = document.getElementById("newName");
+const newUsername = document.getElementById("newUsername");
+const newPass = document.getElementById("newPass");
+const newLevel = document.getElementById("newLevel");
+const newOption = document.getElementById("newOption");
+const createUserBtn = document.getElementById("createUserBtn");
+const closeCrudBtn = document.getElementById("closeCrudBtn");
+const assignRepSelect = document.getElementById("assignRepSelect");
+const assignLevelSelect = document.getElementById("assignLevelSelect");
+const assignRepBtn = document.getElementById("assignRepBtn");
+const countsBox = document.getElementById("countsBox");
+
+/* profile */
+const profPic = document.getElementById("profPic");
+const profName = document.getElementById("profName");
+const profRole = document.getElementById("profRole");
+const profPicInput = document.getElementById("profPicInput");
+
+/* help */
+const helpBtn = document.getElementById("helpBtn");
+const globalHelpBtn = document.getElementById("globalHelpBtn");
+const viewHelpBox = document.getElementById("helpText");
+
+/* login/register fields */
+const loginRole = document.getElementById("loginRole");
+const loginUser = document.getElementById("loginUser");
+const loginPass = document.getElementById("loginPass");
+const regName = document.getElementById("regName");
+const regUsername = document.getElementById("regUsername");
+const regPass = document.getElementById("regPass");
+const regPic = document.getElementById("regPic");
+const regLevel = document.getElementById("regLevel");
+const regOption = document.getElementById("regOption");
+const regCourse = document.getElementById("regCourse");
+
+/* compose target builder */
+function buildComposeTargets(){
+  composeTarget.innerHTML = "";
+  const optAll = document.createElement("option"); optAll.value="all"; optAll.textContent="All Students"; composeTarget.appendChild(optAll);
+  const users = getUsers();
+  /* levels */
+  const levels = ["Diploma 1","Diploma 2","ND 1","ND 2","NDS","HND 1","HND 2"];
+  levels.forEach(l=>{
+    const o = document.createElement("option"); o.value = "level:"+l; o.textContent = l; composeTarget.appendChild(o);
+  });
+  /* single users */
+  users.forEach(u=>{
+    const o = document.createElement("option"); o.value = "user:"+u.id; o.textContent = `${u.name} (${u.role})`; composeTarget.appendChild(o);
+  });
+}
+
+/* initial render of nav targets levels in HOD assign */
+function buildHodAssign(){
+  assignRepSelect.innerHTML=""; assignLevelSelect.innerHTML="";
+  const users = getUsers();
+  const reps = users.filter(u=>u.role==="courserep");
+  reps.forEach(r=>{ const o=document.createElement("option"); o.value=r.id; o.textContent=r.name; assignRepSelect.appendChild(o); });
+  const levels = ["Diploma 1","Diploma 2","ND 1","ND 2","NDS","HND 1","HND 2"];
+  levels.forEach(l=>{ const o=document.createElement("option"); o.value=l; o.textContent=l; assignLevelSelect.appendChild(o); });
+}
+
+/* Update top UI and stats */
+function updateTopUI(){
+  const cur = getCurrent();
+  if(!cur){ topName.textContent="Guest"; topRole.textContent="Not logged"; topAvatar.src=""; displayName.textContent="Guest"; displayRole.textContent=""; avatar.src=""; appArea.classList.add("hide"); authArea.style.display="block"; return; }
+  topName.textContent = cur.name; topRole.textContent = cur.role.toUpperCase();
+  topAvatar.src = cur.pic || `https://ui-avatars.com/api/?name=${encodeURIComponent(cur.name)}&background=013220&color=fff`;
+  displayName.textContent = cur.name; displayRole.textContent = cur.role.toUpperCase();
+  avatar.src = cur.pic || `https://ui-avatars.com/api/?name=${encodeURIComponent(cur.name)}&background=013220&color=fff`;
+  profPic.src = cur.pic || avatar.src; profName.textContent = cur.name; profRole.textContent = cur.role.toUpperCase();
+  // show/hide HOD panel
+  hodPanel.classList.toggle("hide", cur.role !== "hod");
+  // show app area
+  authArea.style.display = "none";
+  appArea.classList.remove("hide");
+  // fill some UI data
+  refreshStats();
+  renderRecentAlerts();
+  renderAlertsList();
+  buildComposeTargets();
+  buildHodAssign();
+  renderUsersTable();
+  updateNotifBadge();
+}
+
+/* Login flow */
+loginBtn.addEventListener("click", ()=>{
+  const role = loginRole.value;
+  const user = loginUser.value.trim();
+  const pass = loginPass.value.trim();
+  if(!user||!pass){ alert("Enter username and password"); return; }
+  const found = getUsers().find(u=>u.username===user && u.pass===pass && u.role===role);
+  if(!found){ alert("Invalid credentials for that role. Check username/password and role."); return; }
+  setCurrent(found);
+  updateTopUI();
+  navigateTo("home");
+});
+
+/* show register */
+showRegBtn.addEventListener("click", ()=>{ loginView.classList.add("hide"); regView.classList.remove("hide"); });
+cancelRegBtn.addEventListener("click", ()=>{ regView.classList.add("hide"); loginView.classList.remove("hide"); });
+
+/* register student (client-side only) */
+regBtn.addEventListener("click", ()=>{
+  const name = regName.value.trim(), username = regUsername.value.trim(), pass = regPass.value.trim();
+  if(!name||!username||!pass){ alert("Provide name, username and password"); return; }
+  const users = getUsers();
+  if(users.find(u=>u.username===username)){ alert("Username taken"); return; }
+  /* handle picture file -> DataURL */
+  const file = regPic.files[0];
+  if(file){
+    const reader = new FileReader();
+    reader.onload = function(e){
+      const picData = e.target.result;
+      createStudentUser(name, username, pass, regLevel.value, regOption.value, regCourse.value, picData);
+    };
+    reader.readAsDataURL(file);
+  } else {
+    createStudentUser(name, username, pass, regLevel.value, regOption.value, regCourse.value, "");
+  }
+});
+
+function createStudentUser(name, username, pass, level, option, course, picData){
+  const users = getUsers();
+  const id = "user_"+Math.floor(Math.random()*1000000);
+  const u = { id, role:"student", username, pass, name, level, option, course, phone:"", pic:picData };
+  users.push(u); saveUsers(users);
+  alert("Registration successful. You can now login.");
+  regView.classList.add("hide"); loginView.classList.remove("hide");
+  document.getElementById("regName").value=""; document.getElementById("regUsername").value=""; document.getElementById("regPass").value="";
+}
+
+/* Logout */
+document.getElementById("logoutBtn").addEventListener("click", ()=>{
+  if(confirm("Logout?")){ setCurrent(null); localStorage.removeItem(LS_CURRENT); updateTopUI(); location.reload(); }
+});
+
+/* Navigation */
+navButtons.forEach(b=>{
+  b.addEventListener("click", ()=>{ navButtons.forEach(x=>x.classList.remove("active")); b.classList.add("active"); navigateTo(b.dataset.nav); });
+});
+function navigateTo(nav){
+  viewHome.classList.add("hide"); viewCourses.classList.add("hide"); viewAlerts.classList.add("hide"); viewProfile.classList.add("hide"); viewHelp.classList.add("hide");
+  composeModal.classList.add("hide"); hodCrudModal.classList.add("hide");
+  mainTitle.textContent = nav.charAt(0).toUpperCase()+nav.slice(1);
+  mainSubtitle.textContent = "";
+  switch(nav){
+    case "home": viewHome.classList.remove("hide"); break;
+    case "courses": viewCourses.classList.remove("hide"); break;
+    case "alerts": viewAlerts.classList.remove("hide"); break;
+    case "profile": viewProfile.classList.remove("hide"); break;
+    case "help": viewHelp.classList.remove("hide"); populateHelp(); break;
+    default: viewHome.classList.remove("hide");
+  }
+}
+
+/* Refresh stats */
+function refreshStats(){
+  const users = getUsers();
+  statStudents.textContent = users.filter(u=>u.role==="student").length;
+  statReps.textContent = users.filter(u=>u.role==="courserep").length;
+  statLects.textContent = users.filter(u=>u.role==="lecturer").length;
+  // counts by level for HOD
+  const levels = ["Diploma 1","Diploma 2","ND 1","ND 2","NDS","HND 1","HND 2"];
+  let html="";
+  levels.forEach(l=>{
+    const c = users.filter(u=>u.role==="student" && u.level===l).length;
+    html += `<div style="margin-top:6px">${l}: <strong>${c}</strong></div>`;
+  });
+  countsBox.innerHTML = html;
+}
+
+/* Recent alerts render */
+function renderRecentAlerts(){
+  const alerts = getAlerts().slice().reverse().slice(0,6);
+  recentAlerts.innerHTML = "";
+  alerts.forEach(a=>{
+    const div = document.createElement("div"); div.style.padding="8px 0";
+    div.innerHTML = `<div style="font-weight:700">${a.fromName} <span class="muted" style="font-weight:600">✍️</span> <span class="muted">• ${timeAgo(a.ts)}</span></div><div>${a.text}</div>`;
+    recentAlerts.appendChild(div);
+  });
+}
+
+/* Alerts list */
+function renderAlertsList(){
+  const alerts = getAlerts().slice().reverse();
+  alertsList.innerHTML = "";
+  if(alerts.length===0){ alertsList.innerHTML = "<div class='muted'>No alerts yet</div>"; return; }
+  alerts.forEach(a=>{
+    const div = document.createElement("div"); div.style.padding="8px 0;border-bottom='1px solid #eee'";
+    div.innerHTML = `<div style="font-weight:700">${a.fromName} ✍️ <span class="muted">• ${timeAgo(a.ts)}</span></div><div style="margin-top:6px">${a.text}</div>`;
+    /* if SMS or email channels present, show action buttons */
+    let actions = '';
+    if(a.channels.includes("sms")) actions += `<button class="small-btn" onclick='openSms(${JSON.stringify(a).replaceAll("'","\\'")})'>Send SMS</button> `;
+    if(a.channels.includes("email")) actions += `<button class="small-btn" onclick='openEmail(${JSON.stringify(a).replaceAll("'","\\'")})'>Send Email</button> `;
+    div.innerHTML += `<div style="margin-top:6px">${actions}</div>`;
+    alertsList.appendChild(div);
+  });
+}
+
+/* Compose workflow */
+composeBtn.addEventListener("click", ()=>{ composeModal.classList.toggle("hide"); populateCompose(); });
+cancelComposeBtn.addEventListener("click", ()=>{ composeModal.classList.add("hide"); });
+chSMS.addEventListener("change", ()=>{ smsOverride.classList.toggle("hide", !chSMS.checked); });
+
+function populateCompose(){
+  buildComposeTargets();
+  composeText.value="";
+  smsOverrideInput.value="";
+}
+
+/* Send alert */
+sendComposeBtn.addEventListener("click", ()=>{
+  const cur = getCurrent(); if(!cur) return alert("Login first");
+  const text = composeText.value.trim(); if(!text) return alert("Enter message");
+  const target = composeTarget.value;
+  const channels = []; if(chPush.checked) channels.push("inapp"); if(chSMS.checked) channels.push("sms"); if(chEmail.checked) channels.push("email");
+  const override = smsOverrideInput.value.trim();
+  // build recipients list
+  let recipients = [];
+  const users = getUsers();
+  if(target==="all") recipients = users.filter(u=>u.role==="student").map(u=>u.id);
+  else if(target.startsWith("level:")){ const lvl = target.split(":")[1]; recipients = users.filter(u=>u.role==="student"&&u.level===lvl).map(u=>u.id); }
+  else if(target.startsWith("user:")){ recipients = [ target.split(":")[1] ]; }
+  // if author is courserep, ensure they can only send to their level
+  if(cur.role==="courserep"){
+    recipients = recipients.filter(id=>{ const u = users.find(x=>x.id===id); return u && u.level===cur.level; });
+  }
+  // create alert object
+  const alertObj = { id: uid(), from: cur.id, fromName: cur.name, to: recipients.length?recipients:["all"], text, channels, ts:Date.now() };
+  const arr = getAlerts(); arr.push(alertObj); saveAlerts(arr);
+  // notifications: in-app just increases badge and shows in list
+  updateNotifBadge();
+  renderRecentAlerts();
+  renderAlertsList();
+  alert("Alert queued. In-app notifications delivered. SMS/Email will open where selected.");
+  // handle SMS override or recipients - open mobile sms composer if possible
+  if(channels.includes("sms")){
+    let phones = [];
+    if(override) phones = override.replace(/\s+/g,"").split(",");
+    else phones = users.filter(u=>recipients.includes(u.id)).map(u=>u.phone).filter(Boolean);
+    if(phones.length) window.location.href = `sms:${phones.join(",")}?body=${encodeURIComponent(cur.name+": "+text)}`;
+  }
+  // handle email
+  if(channels.includes("email")){
+    let emails = users.filter(u=>recipients.includes(u.id)).map(u=>u.email).filter(Boolean);
+    if(emails.length) window.location.href = `mailto:${emails.join(",")}?subject=${encodeURIComponent("Lecture Alert")}&body=${encodeURIComponent(cur.name+": "+text)}`;
+  }
+  composeModal.classList.add("hide");
+});
+
+/* SMS / Email helpers (for buttons in alerts list) */
+function openSms(a){
+  const users = getUsers();
+  let phones = [];
+  if(a.to.includes("all")) phones = users.filter(u=>u.role==="student").map(u=>u.phone).filter(Boolean);
+  else phones = users.filter(u=>a.to.includes(u.id)).map(u=>u.phone).filter(Boolean);
+  if(phones.length) window.location.href = `sms:${phones.join(",")}?body=${encodeURIComponent(a.fromName+": "+a.text)}`;
+  else alert("No phone numbers available");
+}
+function openEmail(a){
+  const users = getUsers();
+  let emails = [];
+  if(a.to.includes("all")) emails = users.filter(u=>u.role==="student").map(u=>u.email).filter(Boolean);
+  else emails = users.filter(u=>a.to.includes(u.id)).map(u=>u.email).filter(Boolean);
+  if(emails.length) window.location.href = `mailto:${emails.join(",")}?subject=${encodeURIComponent("Lecture Alert")}&body=${encodeURIComponent(a.fromName+": "+a.text)}`;
+  else alert("No emails available");
+}
+
+/* Notifications panel */
+notifBtn.addEventListener("click", ()=>{
+  const cur = getCurrent(); if(!cur) return alert("Login to view notifications");
+  const items = getAlerts().slice().reverse().filter(a=>{
+    return a.to.includes("all") || a.to.includes(cur.id);
+  });
+  notifItems.innerHTML = "";
+  if(items.length===0) notifItems.innerHTML = "<div class='muted'>No notifications</div>";
+  items.forEach(it=>{
+    const node = document.createElement("div"); node.style.padding="8px 0";
+    node.innerHTML = `<div style="font-weight:700">${it.fromName} ✍️ <span class="muted" style="font-weight:600">• ${timeAgo(it.ts)}</span></div><div style="margin-top:6px">${it.text}</div>`;
+    notifItems.appendChild(node);
+  });
+  notifModal.classList.remove("hide");
+});
+closeNotif.addEventListener("click", ()=> notifModal.classList.add("hide"));
+
+/* update notif badge count for current user */
+function updateNotifBadge(){
+  const cur = getCurrent();
+  if(!cur){ notifCount.classList.add("hide"); return; }
+  const items = getAlerts().filter(a => a.to.includes("all") || a.to.includes(cur.id));
+  notifCount.textContent = items.length; notifCount.classList.toggle("hide", items.length===0);
+}
+
+/* HOD CRUD & assign */
+openHodCrud.addEventListener("click", ()=>{ hodCrudModal.classList.toggle("hide"); renderUsersTable(); });
+closeCrudBtn.addEventListener("click", ()=>{ hodCrudModal.classList.add("hide"); });
+
+function renderUsersTable(){
+  const users = getUsers();
+  usersTableBody.innerHTML = "";
+  users.forEach(u=>{
+    const tr = document.createElement("tr");
+    const role = u.role[0].toUpperCase()+u.role.slice(1);
+    const lvl = u.level || u.option || "-";
+    tr.innerHTML = `<td>${u.name}<br><small class="muted">${u.username}</small></td><td>${role}</td><td>${lvl}</td>
+      <td>
+        <button class="small-btn" onclick="editUser('${u.id}')">Edit</button>
+        <button class="small-btn" onclick="deleteUser('${u.id}')">Delete</button>
+      </td>`;
+    usersTableBody.appendChild(tr);
+  });
+}
+
+/* create user */
+createUserBtn.addEventListener("click", ()=>{
+  const role = newRole.value, name = newName.value.trim(), username = newUsername.value.trim(), pass = newPass.value.trim();
+  if(!name||!username||!pass){ alert("Provide name/username/password"); return; }
+  const users = getUsers(); if(users.find(u=>u.username===username)){ alert("username taken"); return; }
+  const id = "user_"+Math.floor(Math.random()*1000000);
+  const u = { id, role, username, pass, name, level: newLevel.value, option: newOption.value, course:"", phone:"", pic:"" };
+  users.push(u); saveUsers(users); renderUsersTable(); buildComposeTargets(); buildHodAssign(); refreshStats(); alert("User created");
+});
+
+/* edit user (simple prompt flow) */
+window.editUser = function(id){
+  const users = getUsers(); const idx = users.findIndex(u=>u.id===id); if(idx===-1) return;
+  const u = users[idx];
+  const newName = prompt("Full name", u.name); if(newName===null) return;
+  const newPass = prompt("Password (leave blank to keep)", "");
+  const newLvl = prompt("Level (for students) or blank", u.level||"");
+  u.name = newName.trim() || u.name; if(newPass) u.pass = newPass; u.level = newLvl || u.level;
+  users[idx] = u; saveUsers(users); renderUsersTable(); buildComposeTargets(); refreshStats(); alert("Saved");
+}
+
+/* delete user */
+window.deleteUser = function(id){
+  if(!confirm("Delete this user?")) return;
+  let users = getUsers(); users = users.filter(u=>u.id!==id); saveUsers(users); renderUsersTable(); buildComposeTargets(); refreshStats();
+}
+
+/* assign rep to level */
+assignRepBtn.addEventListener("click", ()=>{
+  const repId = assignRepSelect.value; const lvl = assignLevelSelect.value;
+  const users = getUsers(); const idx = users.findIndex(u=>u.id===repId);
+  if(idx===-1) return alert("Select a rep");
+  users[idx].level = lvl; saveUsers(users); alert("Assigned rep to "+lvl); renderUsersTable(); buildComposeTargets();
+});
+
+/* render courses list for student only when clicked */
+document.getElementById("navCourses").addEventListener("click", ()=>{
+  const cur = getCurrent(); if(!cur || cur.role!=="student"){ alert("Courses visible to students only"); return; }
+  // show courses for their level & option
+  const level = cur.level;
+  const option = cur.option;
+  const allCourses = {
+    "Diploma 1":["Intro to Computing","Basic Math for CS"],
+    "Diploma 2":["Programming Fundamentals","IT Essentials"],
+    "ND 1":["Programming in C","Discrete Math","Intro to DB"],
+    "ND 2":["Data Structures","Systems Analysis","Networks 1"],
+    "NDS":["Special Topics"],
+    "HND 1":["Advanced Programming","OS Fundamentals"],
+    "HND 2": option==="Networking & Cloud Computing" ? ["Advanced Networks","Cloud Foundations"] : ["Software Engineering","Web Dev"]
+  };
+  const list = allCourses[level]||["No courses available for your level"];
+  coursesList.innerHTML = "";
+  list.forEach(c=>{ const d=document.createElement("div"); d.style.padding="8px 0"; d.textContent = c; coursesList.appendChild(d); });
+});
+
+/* Profile picture update */
+profPicInput.addEventListener("change", (e)=>{
+  const f = e.target.files[0]; if(!f) return;
+  const reader = new FileReader(); reader.onload = function(ev){
+    const cur = getCurrent(); if(!cur) return;
+    const users = getUsers(); const idx = users.findIndex(u=>u.id===cur.id); if(idx===-1) return;
+    users[idx].pic = ev.target.result; saveUsers(users); setCurrent(users[idx]); updateTopUI(); alert("Profile picture updated");
+  }; reader.readAsDataURL(f);
+});
+
+/* Help content generator per role */
+function generateHelpFor(role){
+  if(role==="student"){
+    return `Student User Guide
+
+1) Login and Profile
+- Use your username and password to login.
+- Upload profile picture under Profile.
+
+2) Courses
+- Click 'Courses' to view courses for your level.
+- HND students will see specialization-specific courses.
+
+3) Alerts & Notifications
+- You receive alerts from lecturers, course reps, and the HOD.
+- Open the bell 🔔 to view notifications.
+
+4) Messaging
+- Alerts may be sent via in-app, SMS or email. SMS/email will open your device's composer.
+- Respond to lecturers or reps using contact details if provided.
+
+Support: Contact your Course Rep or HOD for help.`;
+  }
+  if(role==="lecturer"){
+    return `Lecturer User Guide
+
+1) Login
+- Use your username/password.
+
+2) Compose Alerts
+- Click 'Compose Alert' to send messages to All, level groups or specific users.
+- Choose channels: in-app, SMS, Email. SMS opens your device composer.
+
+3) Manage your classes
+- View student counts on Home.
+- Use alerts to notify students of class changes.
+
+4) Help & Support
+- Contact the HOD for administrative actions.`;
+  }
+  if(role==="courserep"){
+    return `Course Rep User Guide
+
+1) Role
+- Course Reps represent their level. HOD assigns reps.
+
+2) Sending Announcements
+- Use 'Compose Alert' to inform classmates about venue or timetable changes.
+- You can only send to your assigned level.
+
+3) Communication
+- Ensure contact numbers for students are correct for SMS notifications.
+
+4) Help
+- Contact your Lecturer or HOD for escalations.`;
+  }
+  if(role==="hod"){
+    return `HOD User Guide (Mr. Tyavnande Moses)
+
+1) Overview
+- You manage users, assign course reps, and send department-wide alerts.
+
+2) Users (CRUD)
+- Open 'Manage Users' to create/edit/delete accounts.
+- Assign course reps to levels via the assign panel.
+
+3) Alerts
+- Use Compose to broadcast urgent messages to all students or target levels.
+- Choose channels: in-app, SMS, email.
+
+4) Reporting
+- View student counts per level in HOD Controls.
+
+Security note: Keep HOD credentials secure and only use official channels for urgent alerts.`;
+  }
+  return "General help";
+}
+
+/* Populate help area */
+function populateHelp(){
+  const cur = getCurrent();
+  let text = "Not logged in. Please login to see role-based help.";
+  if(cur) text = generateHelpFor(cur.role);
+  viewHelpBox.textContent = text;
+}
+
+/* help button handlers */
+helpBtn.addEventListener("click", ()=>{ populateHelp(); navigateTo("help"); });
+globalHelpBtn.addEventListener("click", ()=>{ populateHelp(); navigateTo("help"); });
+
+/* HOD CRUD initial render on load */
+renderUsersTable();
+
+/* render users table periodic update */
+function renderUsersTable(){ // updated function to ensure tbody uses current users
+  const users = getUsers();
+  usersTableBody.innerHTML = "";
+  users.forEach(u=>{
+    const tr = document.createElement("tr");
+    const role = u.role[0].toUpperCase()+u.role.slice(1);
+    const lvl = u.level || u.option || "-";
+    tr.innerHTML = `<td>${u.name}<br><small class="muted">${u.username}</small></td><td>${role}</td><td>${lvl}</td>
+      <td>
+        <button class="small-btn" onclick="editUserDialog('${u.id}')">Edit</button>
+        <button class="small-btn" onclick="deleteUserConfirm('${u.id}')">Delete</button>
+      </td>`;
+    usersTableBody.appendChild(tr);
+  });
+}
+
+/* delete user confirm wrapper */
+function deleteUserConfirm(id){
+  if(!confirm("Delete user permanently?")) return;
+  let users = getUsers(); users = users.filter(u=>u.id!==id); saveUsers(users);
+  renderUsersTable(); buildComposeTargets(); refreshStats();
+}
+
+/* edit user dialog simple */
+function editUserDialog(id){
+  const users = getUsers(); const u = users.find(x=>x.id===id);
+  if(!u) return alert("User not found");
+  const newName = prompt("Full name", u.name); if(newName===null) return;
+  const newPass = prompt("Password (leave blank to keep)", "");
+  const newLevel = prompt("Level (for students)", u.level||"");
+  u.name = newName.trim() || u.name; if(newPass) u.pass = newPass; if(newLevel) u.level = newLevel;
+  saveUsers(users); renderUsersTable(); buildComposeTargets(); refreshStats();
+}
+
+/* setCurrent on load if exists */
+if(getCurrent()){ updateTopUI(); navigateTo("home"); } else { updateTopUI(); navigateTo("home"); }
+
+/* update counts and UI */
+function renderUsersTable(){ const users=getUsers(); usersTableBody.innerHTML=""; users.forEach(u=>{ const tr=document.createElement("tr"); const role=u.role[0].toUpperCase()+u.role.slice(1); const lvl=u.level||u.option||"-"; tr.innerHTML=`<td>${u.name}<br><small class="muted">${u.username}</small></td><td>${role}</td><td>${lvl}</td><td><button class="small-btn" onclick="editUserDialog('${u.id}')">Edit</button> <button class="small-btn" onclick="deleteUserConfirm('${u.id}')">Delete</button></td>`; usersTableBody.appendChild(tr);});}
+
+/* finally, helper to update badge/UI periodically */
+setInterval(()=>{ updateTopUI(); }, 2000);
+
+</script>
+</body>
+</html>

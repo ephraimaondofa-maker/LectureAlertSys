@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lecture Alert System — Welcome</title>
+  <style>
+    :root {
+      --brand: #013220;
+      --accent: #00a89a;
+      --accent2: #0077cc;
+      --light: #f5fbfa;
+      --text: #0b1a16;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: "Inter", Arial, sans-serif;
+      background: linear-gradient(180deg, var(--brand), #02573e);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .card {
+      background: #fff;
+      border-radius: 16px;
+      padding: 40px 30px;
+      max-width: 720px;
+      text-align: center;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+      animation: fadeIn 1s ease;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .logo {
+      width: 120px;
+      height: 50px;
+      background: var(--brand);
+      color: #fff;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 10px;
+      margin: 0 auto 15px;
+      font-size: 18px;
+    }
+    h1 {
+      font-size: 22px;
+      margin-bottom: 8px;
+      color: var(--brand);
+    }
+    h2 {
+      font-size: 16px;
+      font-weight: 500;
+      color: #777;
+      margin-bottom: 24px;
+    }
+    p {
+      color: #333;
+      line-height: 1.6;
+      margin-bottom: 16px;
+    }
+    ul {
+      text-align: left;
+      margin: 0 auto 20px;
+      padding: 0;
+      list-style: none;
+      max-width: 600px;
+    }
+    ul li {
+      background: var(--light);
+      padding: 10px 14px;
+      border-radius: 8px;
+      margin: 6px 0;
+      font-size: 15px;
+    }
+    button {
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      color: #fff;
+      border: none;
+      padding: 12px 28px;
+      border-radius: 10px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.3s;
+    }
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 12px rgba(0,0,0,0.15);
+    }
+    footer {
+      margin-top: 20px;
+      font-size: 13px;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="logo">CS-LAS</div>
+    <h1>Lecture Alert System</h1>
+    <h2>Department of Computer Science</h2>
+    <p>
+      The <strong>Lecture Alert System</strong> is designed to enhance communication between lecturers,
+      course representatives, and students. It ensures timely updates on lectures, changes in schedules,
+      and departmental announcements.
+    </p>
+    <p>
+      With this system:
+    </p>
+    <ul>
+      <li>📢 Lecturers can post alerts instantly for all or selected levels.</li>
+      <li>🎓 Students receive real-time updates about their classes.</li>
+      <li>👥 Course Representatives coordinate information within their levels.</li>
+      <li>👨‍🏫 The HOD can monitor and manage departmental users.</li>
+    </ul>
+    <p>
+      Stay informed. Stay connected. Never miss a class update again!
+    </p>
+    <button onclick="location.href='login.html'">CONTINUE ➜</button>
+    <footer>
+      © 2025 Computer Science Department — Lecture Alert System
+    </footer>
+  </div>
+</body>
+</html>

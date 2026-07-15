@@ -1,0 +1,374 @@
+This is an excellent way to approach AI Engineering. The curriculum you've described is ambitious but realistic for a full-time learner studying **9:00 AM–5:00 PM every day**.
+
+I will act as your:
+
+* Senior Python Engineer
+* AI Engineer
+* Machine Learning Engineer
+* Computer Science Professor
+* Software Architect
+* Technical Interview Coach
+* Code Reviewer
+* Debugging Mentor
+* Pair Programmer
+* Project Mentor
+
+The curriculum will be inspired by **01 Edu's "learn by building" philosophy**, while following industry practices used by companies like OpenAI, Google, Microsoft, Anthropic, and Meta.
+
+---
+
+# Curriculum Structure
+
+The program is divided into progressively harder stages.
+
+## Phase 1 — Python Foundations (Weeks 1–5)
+
+Goal:
+Become comfortable writing Python professionally.
+
+Topics include:
+
+* Installing Python
+* VS Code
+* Terminal
+* Variables
+* Data Types
+* Operators
+* Strings
+* Lists
+* Tuples
+* Dictionaries
+* Sets
+* Conditionals
+* Loops
+* Functions
+* Modules
+* Packages
+* File Handling
+* Exceptions
+* Virtual Environments
+* pip
+* Object-Oriented Programming
+* Type Hints
+* Testing
+* Professional Code Style
+
+**Project examples:**
+
+* Calculator
+* Expense Tracker
+* Password Manager
+* Quiz Application
+* Library Manager
+
+---
+
+## Phase 2 — Computer Science Fundamentals (Weeks 6–9)
+
+Topics:
+
+* Time Complexity
+* Big-O
+* Memory
+* Recursion
+* Stacks
+* Queues
+* Linked Lists
+* Trees
+* Hash Tables
+* Graphs
+* Searching
+* Sorting
+
+Projects:
+
+* Search Engine
+* File Indexer
+* Mini Git
+* Command-Line Utilities
+
+---
+
+## Phase 3 — Software Engineering (Weeks 10–13)
+
+Topics:
+
+* Git
+* GitHub
+* Branching
+* Pull Requests
+* Testing
+* Logging
+* Packaging
+* Design Patterns
+* SOLID Principles
+* Clean Code
+
+Projects:
+
+* REST API
+* Authentication System
+* Task Manager
+
+---
+
+## Phase 4 — Mathematics for AI (Weeks 14–17)
+
+Topics:
+
+* Algebra
+* Functions
+* Statistics
+* Probability
+* Linear Algebra
+* Calculus
+* Optimization
+
+Projects:
+
+* Matrix Library
+* Gradient Descent Visualizer
+
+---
+
+## Phase 5 — Data Analysis (Weeks 18–20)
+
+Topics:
+
+* NumPy
+* Pandas
+* Data Cleaning
+* Visualization
+* EDA
+
+Projects:
+
+* Sales Dashboard
+* Data Analysis Reports
+
+---
+
+## Phase 6 — Machine Learning (Weeks 21–27)
+
+Topics:
+
+* Supervised Learning
+* Regression
+* Classification
+* Decision Trees
+* Random Forest
+* SVM
+* Clustering
+* Model Evaluation
+
+Projects:
+
+* House Price Prediction
+* Spam Detector
+* Customer Churn Prediction
+
+---
+
+## Phase 7 — Deep Learning (Weeks 28–34)
+
+Topics:
+
+* Neural Networks
+* Backpropagation
+* TensorFlow
+* PyTorch
+* CNNs
+* RNNs
+* LSTMs
+
+Projects:
+
+* Image Classifier
+* Handwritten Digit Recognition
+
+---
+
+## Phase 8 — NLP & Transformers (Weeks 35–40)
+
+Topics:
+
+* Tokenization
+* Embeddings
+* Attention
+* Transformers
+* BERT
+* GPT
+* Fine-Tuning
+
+Projects:
+
+* Text Classifier
+* Summarizer
+* Chatbot
+
+---
+
+## Phase 9 — LLM Engineering (Weeks 41–45)
+
+Topics:
+
+* Prompt Engineering
+* OpenAI API
+* Function Calling
+* Structured Outputs
+* Context Windows
+* Vector Databases
+* Embeddings
+
+Projects:
+
+* AI Assistant
+* Document QA
+* AI Tutor
+
+---
+
+## Phase 10 — RAG (Weeks 46–48)
+
+Topics:
+
+* Chunking
+* Retrieval
+* FAISS
+* Chroma
+* Hybrid Search
+* Reranking
+
+Projects:
+
+* Company Knowledge Assistant
+
+---
+
+## Phase 11 — AI Agents (Weeks 49–51)
+
+Topics:
+
+* Agent Planning
+* Tool Use
+* Memory
+* Multi-Agent Systems
+* LangGraph
+* MCP Concepts
+
+Projects:
+
+* Research Agent
+* Coding Assistant
+* Business Automation Agent
+
+---
+
+## Phase 12 — Production AI Engineering (Weeks 52+)
+
+Topics:
+
+* FastAPI
+* Docker
+* Linux
+* Cloud
+* CI/CD
+* MLOps
+* Monitoring
+* Deployment
+* System Design
+
+Projects:
+
+* Production AI SaaS
+* AI API
+* AI Dashboard
+* Enterprise AI Application
+
+---
+
+# Learning Philosophy
+
+Every study day follows a consistent structure so you know exactly what to expect.
+
+1. Daily Objectives
+2. Prerequisites
+3. Estimated Study Time
+4. Deep Theory
+5. Vocabulary
+6. Code Walkthroughs
+7. Coding Exercises (Easy / Medium / Hard)
+8. Mini Challenges
+9. Main Portfolio Project
+10. Stretch Goals
+11. Debugging Exercises
+12. Refactoring Exercise
+13. Computer Science Corner
+14. Mathematics Corner
+15. AI Engineering Connection
+16. Git Tasks
+17. GitHub Repository Tasks
+18. LinkedIn Post
+19. Daily Journal
+20. 20-Question Quiz
+21. FAANG-Style Interview Questions
+22. Senior Engineer Code Review Checklist
+23. 01 Edu–Style Project Audit
+24. Bonus Project
+
+---
+
+# Teaching Rules
+
+Throughout the course I will:
+
+* Explain every concept from first principles.
+* Show how Python works internally where appropriate.
+* Explain memory models and performance trade-offs.
+* Compare alternatives and discuss when to use each.
+* Include ASCII diagrams when they clarify concepts.
+* Emphasize debugging and reading error messages.
+* Encourage problem solving before revealing solutions.
+* Introduce professional tools (Git, testing, linting, documentation) early and reinforce them continuously.
+* Connect each lesson to its role in AI engineering.
+
+---
+
+# Portfolio Progression
+
+By the end of the program, you'll have a GitHub portfolio containing progressively more advanced projects, including:
+
+* Calculator
+* Expense Tracker
+* Password Manager
+* Quiz System
+* Library Management System
+* File Organizer
+* Data Analysis Dashboard
+* Machine Learning Models
+* NLP Applications
+* AI Chatbot
+* RAG Knowledge Assistant
+* AI Agent
+* FastAPI AI Backend
+* Dockerized AI Application
+* Production AI SaaS
+
+---
+
+# Expected Outcome
+
+If you complete the curriculum, actively solve the exercises, build the projects, and reflect on the code reviews, you should be prepared to:
+
+* Build production-ready AI applications.
+* Read and contribute to professional Python codebases.
+* Understand the theory behind AI systems rather than relying on tutorials.
+* Design, implement, test, deploy, and maintain AI software.
+* Perform well in technical interviews covering Python, computer science, machine learning, and AI engineering.
+
+Whenever you're ready, simply say:
+
+> **Generate Day 1**
+
+and I'll generate a complete, full-day (9:00 AM–5:00 PM) learning experience with theory, exercises, debugging, project work, Git tasks, interview questions, a LinkedIn post, and everything else you've requested.
+
